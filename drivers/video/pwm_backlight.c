@@ -34,7 +34,7 @@ static int pwm_backlight_enable(struct udevice *dev)
 	debug("%s: Enable '%s', regulator '%s'\n", __func__, dev->name,
 	      priv->reg->name);
 	ret = regulator_set_enable(priv->reg, true);
-	if (ret) {
+	if (ret && ret != -ENOSYS) {
 		debug("%s: Cannot enable regulator for PWM '%s'\n", __func__,
 		      dev->name);
 		return ret;
