@@ -10,7 +10,7 @@
 
 #include <asm/gpio.h>
 
-#define ACT8846_NUM_OF_REGS	12
+#define ACT8846_NUM_OF_REGS	0xc3
 
 #define BUCK_VOL_MASK 0x3f
 #define LDO_VOL_MASK 0x3f
