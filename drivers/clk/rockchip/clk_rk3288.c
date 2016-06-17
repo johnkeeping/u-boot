@@ -40,6 +40,7 @@ struct pll_div {
 	u32 nr;
 	u32 nf;
 	u32 no;
+	u32 nb;
 };
 
 enum {
@@ -135,9 +136,15 @@ enum {
 		       (_nr * _no) == hz, #hz "Hz cannot be hit with PLL "\
 		       "divisors on line " __stringify(__LINE__));
 
+#define PLL_DIVISORS_EXPLICIT(hz, _nr, _nf, _no, _nb) { \
+	.nr = _nr, .nf = _nf, .no = _no, .nb = _nb};\
+	_Static_assert(((u64)hz * _nr * _no / OSC_HZ) * OSC_HZ /\
+		       (_nr * _no) == hz, #hz "Hz cannot be hit with PLL "\
+		       "divisors on line " __stringify(__LINE__));
+
 /* Keep divisors as low as possible to reduce jitter and power usage */
 static const struct pll_div apll_init_cfg = PLL_DIVISORS(APLL_HZ, 1, 1);
-static const struct pll_div gpll_init_cfg = PLL_DIVISORS(GPLL_HZ, 2, 2);
+static const struct pll_div gpll_init_cfg = PLL_DIVISORS_EXPLICIT(GPLL_HZ, 1, 198, 8, 1);
 static const struct pll_div cpll_init_cfg = PLL_DIVISORS(CPLL_HZ, 1, 2);
 
 void *rockchip_get_cru(void)
@@ -177,7 +184,7 @@ static int rkclk_set_pll(struct rk3288_cru *cru, enum rk_clk_id clk_id,
 		     CLKR_MASK << CLKR_SHIFT | PLL_OD_MASK,
 		     ((div->nr - 1) << CLKR_SHIFT) | (div->no - 1));
 	rk_clrsetreg(&pll->con1, CLKF_MASK, div->nf - 1);
-	rk_clrsetreg(&pll->con2, PLL_BWADJ_MASK, (div->nf >> 1) - 1);
+	rk_clrsetreg(&pll->con2, PLL_BWADJ_MASK, (div->nb ? div->nb : (div->nf >> 1)) - 1);
 
 	udelay(10);
 
