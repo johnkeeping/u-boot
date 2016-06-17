@@ -743,9 +743,9 @@ static ulong rk3288_clk_set_rate(struct clk *clk, ulong rate)
 		rk_setreg(&cru->cru_clksel_con[28], 1 << 15);
 
 		/* rst edp */
-		rk_setreg(&cru->cru_clksel_con[6], 1 << 15);
+		rk_setreg(&cru->cru_softrst_con[6], 1 << 15);
 		udelay(1);
-		rk_clrreg(&cru->cru_clksel_con[6], 1 << 15);
+		rk_clrreg(&cru->cru_softrst_con[6], 1 << 15);
 		new_rate = rate;
 		break;
 	case ACLK_VOP0:
