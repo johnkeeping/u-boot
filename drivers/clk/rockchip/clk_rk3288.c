@@ -145,7 +145,7 @@ enum {
 /* Keep divisors as low as possible to reduce jitter and power usage */
 static const struct pll_div apll_init_cfg = PLL_DIVISORS(APLL_HZ, 1, 1);
 static const struct pll_div gpll_init_cfg = PLL_DIVISORS_EXPLICIT(GPLL_HZ, 1, 198, 8, 1);
-static const struct pll_div cpll_init_cfg = PLL_DIVISORS(CPLL_HZ, 1, 2);
+static const struct pll_div cpll_init_cfg = PLL_DIVISORS(CPLL_HZ, 3, 2);
 
 void *rockchip_get_cru(void)
 {

@@ -13,7 +13,7 @@
 
 #define APLL_HZ		(1800 * 1000000)
 #define GPLL_HZ		(594 * 1000000)
-#define CPLL_HZ		(384 * 1000000)
+#define CPLL_HZ		(400 * 1000000)
 #define NPLL_HZ		(384 * 1000000)
 
 /* The SRAM is clocked off aclk_bus, so we want to max it out for boot speed */
