@@ -15,6 +15,10 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+struct act8846_platdata {
+	bool system_power_controller;
+};
+
 static const struct pmic_child_info pmic_children_info[] = {
 	{ .prefix = "REG", .driver = "act8846_reg"},
 	{ },
@@ -46,6 +50,30 @@ static int act8846_read(struct udevice *dev, uint reg, uint8_t *buff, int len)
 	return 0;
 }
 
+static int act8846_poweroff(struct udevice *dev)
+{
+	struct act8846_platdata *plat = dev_get_platdata(dev);
+	int ret;
+
+	if (!plat->system_power_controller)
+		return -EINVAL;
+
+	for (;;) {
+		ret = pmic_reg_write(dev, ACT8846_GLB_OFF_CTRL,
+				     ACT8846_OFFSYSCLR);
+		if (ret)
+			return ret;
+
+		ret = pmic_reg_write(dev, ACT8846_GLB_OFF_CTRL,
+				     ACT8846_OFFSYSCLR | ACT8846_OFFSYS);
+		if (ret)
+			return ret;
+
+		mdelay(10);
+		printf("%s: powerdown failed!\n", __func__);
+	}
+}
+
 static int act8846_bind(struct udevice *dev)
 {
 	const void *blob = gd->fdt_blob;
@@ -70,10 +98,23 @@ static int act8846_bind(struct udevice *dev)
 	return 0;
 }
 
+static int act8846_ofdata_to_platdata(struct udevice *dev)
+{
+	struct act8846_platdata *plat = dev_get_platdata(dev);
+	const void *blob = gd->fdt_blob;
+	int node = dev->of_offset;
+
+	plat->system_power_controller =
+		fdtdec_get_bool(blob, node, "system-power-controller");
+
+	return 0;
+}
+
 static struct dm_pmic_ops act8846_ops = {
 	.reg_count = act8846_reg_count,
 	.read = act8846_read,
 	.write = act8846_write,
+	.poweroff = act8846_poweroff,
 };
 
 static const struct udevice_id act8846_ids[] = {
@@ -86,5 +127,7 @@ U_BOOT_DRIVER(pmic_act8846) = {
 	.id = UCLASS_PMIC,
 	.of_match = act8846_ids,
 	.bind = act8846_bind,
+	.ofdata_to_platdata = act8846_ofdata_to_platdata,
 	.ops = &act8846_ops,
+	.platdata_auto_alloc_size = sizeof(struct act8846_platdata),
 };

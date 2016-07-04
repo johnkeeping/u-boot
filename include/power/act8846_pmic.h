@@ -12,6 +12,10 @@
 
 #define ACT8846_NUM_OF_REGS	12
 
+#define	ACT8846_GLB_OFF_CTRL	0xc3
+#define	ACT8846_OFFSYSCLR	BIT(3)
+#define	ACT8846_OFFSYS		BIT(4)
+
 #define BUCK_VOL_MASK 0x3f
 #define LDO_VOL_MASK 0x3f
 
