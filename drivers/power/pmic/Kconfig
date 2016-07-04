@@ -1,6 +1,7 @@
 config DM_PMIC
 	bool "Enable Driver Model for PMIC drivers (UCLASS_PMIC)"
 	depends on DM
+	select CMD_POWEROFF
 	---help---
 	This config enables the driver-model PMIC support.
 	UCLASS_PMIC - designed to provide an I/O interface for PMIC devices.

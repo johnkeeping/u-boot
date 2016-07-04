@@ -158,12 +158,14 @@ struct pmic {
  * @reg_count: device's register count
  * @read:      read 'len' bytes at "reg" and store it into the 'buffer'
  * @write:     write 'len' bytes from the 'buffer' to the register at 'reg' address
+ * @poweroff:  if the PMIC controls system power, turn off the device
  */
 struct dm_pmic_ops {
 	int (*reg_count)(struct udevice *dev);
 	int (*read)(struct udevice *dev, uint reg, uint8_t *buffer, int len);
 	int (*write)(struct udevice *dev, uint reg, const uint8_t *buffer,
 		     int len);
+	int (*poweroff)(struct udevice *dev);
 };
 
 /**
@@ -296,6 +298,17 @@ int pmic_reg_write(struct udevice *dev, uint reg, uint value);
  * @return 0 on success or negative value of errno.
  */
 int pmic_clrsetbits(struct udevice *dev, uint reg, uint clr, uint set);
+
+/**
+ * pmic_poweroff() - turn off system power
+ *
+ * This only has an effect if the PMIC is the system power controller,
+ * otherwise it should return -EINVAL.
+ *
+ * @dev:	PMIC device to power off
+ * @return negative value of errno or does not return on success
+ */
+int pmic_poweroff(struct udevice *dev);
 
 #endif /* CONFIG_DM_PMIC */
 

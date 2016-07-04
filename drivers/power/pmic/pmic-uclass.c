@@ -165,7 +165,33 @@ int pmic_clrsetbits(struct udevice *dev, uint reg, uint clr, uint set)
 	return pmic_reg_write(dev, reg, byte);
 }
 
+int pmic_poweroff(struct udevice *dev)
+{
+	const struct dm_pmic_ops *ops = dev_get_driver_ops(dev);
+
+	if (!ops || !ops->poweroff)
+		return -ENOSYS;
+
+	return ops->poweroff(dev);
+}
+
 UCLASS_DRIVER(pmic) = {
 	.id		= UCLASS_PMIC,
 	.name		= "pmic",
 };
+
+int do_poweroff(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	struct uclass *uc;
+	struct udevice *dev;
+	int ret;
+
+	ret = uclass_get(UCLASS_PMIC, &uc);
+	if (ret)
+		return ret;
+
+	uclass_foreach_dev(dev, uc)
+		ret = pmic_poweroff(dev);
+
+	return ret;
+}
