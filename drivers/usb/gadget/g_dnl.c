@@ -27,6 +27,7 @@
  * CONFIG_G_DNL_VENDOR_NUM
  * CONFIG_G_DNL_PRODUCT_NUM
  * CONFIG_G_DNL_MANUFACTURER
+ * CONFIG_G_DNL_PRODUCT
  * at e.g. ./configs/<board>_defconfig
  */
 
@@ -42,7 +43,7 @@
 
 #define DRIVER_VERSION		"usb_dnl 2.0"
 
-static const char product[] = "USB download gadget";
+static const char product[] = CONFIG_G_DNL_PRODUCT;
 static char g_dnl_serial[MAX_STRING_SERIAL];
 static const char manufacturer[] = CONFIG_G_DNL_MANUFACTURER;
 
