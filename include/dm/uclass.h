@@ -194,6 +194,23 @@ int uclass_get_device_by_phandle(enum uclass_id id, struct udevice *parent,
 				 const char *name, struct udevice **devp);
 
 /**
+ * uclass_get_device_by_driver() - Get a uclass device for a driver
+ *
+ * This searches the devices in the uclass for one that uses the given
+ * driver. Use DM_GET_DRIVER(name) for the @drv argument, where 'name' is
+ * the driver name - as used in U_BOOT_DRIVER(name).
+ *
+ * The device is probed to activate it ready for use.
+ *
+ * @id: ID to look up
+ * @drv: Driver to look for
+ * @devp: Returns pointer to the first device with that driver
+ * @return 0 if OK, -ve on error
+ */
+int uclass_get_device_by_driver(enum uclass_id id, const struct driver *drv,
+				struct udevice **devp);
+
+/**
  * uclass_first_device() - Get the first device in a uclass
  *
  * The device returned is probed if necessary, and ready for use
