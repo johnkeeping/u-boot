@@ -474,6 +474,22 @@ done:
 	return status;
 }
 
+/**
+ * struct usb_os_string - represents OS String to be reported by a gadget
+ * @bLength: total length of the entire descritor, always 0x12
+ * @bDescriptorType: USB_DT_STRING
+ * @qwSignature: the OS String proper
+ * @bMS_VendorCode: code used by the host for subsequent requests
+ * @bPad: not used, must be zero
+ */
+struct usb_os_string {
+	__u8	bLength;
+	__u8	bDescriptorType;
+	__u8	qwSignature[OS_STRING_QW_SIGN_LEN];
+	__u8	bMS_VendorCode;
+	__u8	bPad;
+} __packed;
+
 /*
  * We support strings in multiple languages ... string descriptor zero
  * says which languages are supported.	The typical case will be that
@@ -564,6 +580,19 @@ static int get_string(struct usb_composite_dev *cdev,
 
 		s->bLength = 2 * (len + 1);
 		return s->bLength;
+	}
+
+	if (cdev->use_os_string && language == 0 && id == OS_STRING_IDX) {
+		struct usb_os_string *b = buf;
+		b->bLength = sizeof(*b);
+		b->bDescriptorType = USB_DT_STRING;
+		compiletime_assert(
+			sizeof(b->qwSignature) == sizeof(cdev->qw_sign),
+			"qwSignature size must be equal to qw_sign");
+		memcpy(&b->qwSignature, cdev->qw_sign, sizeof(b->qwSignature));
+		b->bMS_VendorCode = cdev->b_vendor_code;
+		b->bPad = 0;
+		return sizeof(*b);
 	}
 
 	/*
