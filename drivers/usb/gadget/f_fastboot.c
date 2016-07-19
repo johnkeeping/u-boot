@@ -28,6 +28,8 @@
 #include <fb_nand.h>
 #endif
 
+#include "u_os_desc.h"
+
 #define FASTBOOT_VERSION		"0.4"
 
 #define FASTBOOT_INTERFACE_CLASS	0xff
@@ -173,12 +175,43 @@ static void fastboot_complete(struct usb_ep *ep, struct usb_request *req)
 	printf("status: %d ep '%s' trans: %d\n", status, ep->name, req->actual);
 }
 
+static char fastboot_ext_compat_id[16] = "WINUSB";
+
+static int fastboot_set_os_desc(struct usb_configuration *c,
+				struct usb_function *f)
+{
+	struct usb_os_desc_table *desc_table = calloc(1, sizeof(*desc_table));
+	struct usb_os_desc *desc = calloc(1, sizeof(*desc));
+
+	if (!desc_table || !desc)
+		return -ENOMEM;
+
+	INIT_LIST_HEAD(&desc->ext_prop);
+	desc->ext_compat_id = fastboot_ext_compat_id;
+
+	desc_table->if_id = 0;
+	desc_table->os_desc = desc;
+
+	c->cdev->b_vendor_code = 0x10;
+	c->cdev->use_os_string = 1;
+	c->cdev->os_desc_config = c;
+	utf8_to_utf16le("MSFT100", (__le16 *) c->cdev->qw_sign,
+			OS_STRING_QW_SIGN_LEN);
+
+	f->os_desc_table = desc_table;
+	f->os_desc_n = 1;
+
+	return 0;
+}
+
 static int fastboot_bind(struct usb_configuration *c, struct usb_function *f)
 {
 	int id;
 	struct usb_gadget *gadget = c->cdev->gadget;
 	struct f_fastboot *f_fb = func_to_fastboot(f);
 	const char *s;
+
+	fastboot_set_os_desc(c, f);
 
 	/* DYNAMIC interface numbers assignments */
 	id = usb_interface_id(c, f);
@@ -221,6 +254,14 @@ static int fastboot_bind(struct usb_configuration *c, struct usb_function *f)
 
 static void fastboot_unbind(struct usb_configuration *c, struct usb_function *f)
 {
+	struct usb_os_desc_table *desc_table = f->os_desc_table;
+
+	f->os_desc_table = NULL;
+	f->os_desc_n = 0;
+
+	free(desc_table->os_desc);
+	free(desc_table);
+
 	memset(fastboot_func, 0, sizeof(*fastboot_func));
 }
 
