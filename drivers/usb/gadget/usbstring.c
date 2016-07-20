@@ -15,7 +15,7 @@
 #include <asm/unaligned.h>
 
 
-static int utf8_to_utf16le(const char *s, __le16 *cp, unsigned len)
+int utf8_to_utf16le(const char *s, __le16 *cp, unsigned len)
 {
 	int	count = 0;
 	u8	c;
