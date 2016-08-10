@@ -88,7 +88,7 @@ static bool fixed_regulator_get_enable(struct udevice *dev)
 	struct fixed_regulator_platdata *dev_pdata = dev_get_platdata(dev);
 
 	if (!dev_pdata->gpio.dev)
-		return false;
+		return true;
 
 	return dm_gpio_get_value(&dev_pdata->gpio);
 }
